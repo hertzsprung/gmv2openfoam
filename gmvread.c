@@ -6151,15 +6151,40 @@ void struct2face()
 
 int main(int args, char **argv)
 {
-   gmvread_printon();
+//   gmvread_printon();
    gmvread_checkfile("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
    gmvread_open("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
    gmvread_data();
    gmvread_mesh();
-   printf("#points\n");
+/*   printf("#points\n");
    for (int i=0; i < gmv_meshdata.nnodes; i++)
    {
       printf("%e %e %e\n", gmv_meshdata.x[i], gmv_meshdata.y[i], gmv_meshdata.z[i]);
+   }
+*/
+
+   printf("#nfaces %li\n", gmv_meshdata.nfaces);
+   printf("#totverts %li\n", gmv_meshdata.totverts);
+   printf("#cell stuff\n");
+   for (long c=0; c < gmv_meshdata.ncells; c++)
+   {
+      long startFaceI = gmv_meshdata.celltoface[c];
+      long endFaceI = gmv_meshdata.celltoface[c+1];
+      printf("cell %li with faces from %li to %li\n", c, startFaceI, endFaceI-1);
+      for (long f=startFaceI; f < endFaceI; f++)
+      {
+         long startVertexI = gmv_meshdata.facetoverts[f];
+	 long endVertexI = gmv_meshdata.facetoverts[f+1];
+	 printf("   face %li with vertices from %li to %li\n", f, startVertexI, endVertexI-1);
+	 for (long v=startVertexI; v < endVertexI; v++)
+	 {
+            long vertexI = gmv_meshdata.faceverts[v];
+            printf("vertex %li ", vertexI);
+            printf("(%e %e %e) ", gmv_meshdata.x[vertexI], gmv_meshdata.y[vertexI], gmv_meshdata.z[vertexI]);
+	 }
+         printf("\n");
+      }
+      printf("\n");
    }
    gmvread_close();
    return EXIT_SUCCESS;
