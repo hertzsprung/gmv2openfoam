@@ -25,10 +25,8 @@
 
 #define RDATA_INIT
 #include "gmvread.h"
-/* #include "gmvrayread.h" */
 
 #include <sys/types.h>
-/* #include <malloc.h> */
 #include <math.h>
 
 #define FREE(a) { if (a) free(a); a = NULL; }
@@ -6151,56 +6149,54 @@ void struct2face()
 
 int main(int args, char **argv)
 {
-//   gmvread_printon();
    gmvread_checkfile("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
    gmvread_open("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
    gmvread_data();
    gmvread_mesh();
-/*   printf("#points\n");
-   for (int i=0; i < gmv_meshdata.nnodes; i++)
-   {
-      printf("%e %e %e\n", gmv_meshdata.x[i], gmv_meshdata.y[i], gmv_meshdata.z[i]);
-   }
-*/
 
-   printf("#nfaces %li\n", gmv_meshdata.nfaces);
-   printf("#totverts %li\n", gmv_meshdata.totverts);
-   printf("#cell stuff\n");
+   FILE* points_file;
+   points_file = fopen("points.dat", "w");
+   for (int v=0; v < gmv_meshdata.nnodes; v++)
+   {
+      fprintf(points_file, "%e %e %e\n", gmv_meshdata.x[v], gmv_meshdata.y[v], gmv_meshdata.z[v]);
+   }
+   fclose(points_file);
+
+   FILE* faces_file;
+   faces_file = fopen("faces.dat", "w");
+   for (int f=0; f < gmv_meshdata.nfaces; f++)
+   {
+      long startVertexI = gmv_meshdata.facetoverts[f];
+      long endVertexI = gmv_meshdata.facetoverts[f+1];
+      for (long v=startVertexI; v < endVertexI; v++)
+      {
+         long vertexI = gmv_meshdata.faceverts[v];
+         fprintf(faces_file, "%li ", vertexI);
+      }
+      fprintf(faces_file, "\n");
+   }
+   fclose(faces_file);
+
+   FILE* cells_file;
+   cells_file = fopen("cells.dat", "w");
    for (long c=0; c < gmv_meshdata.ncells; c++)
    {
       long startFaceI = gmv_meshdata.celltoface[c];
       long endFaceI = gmv_meshdata.celltoface[c+1];
-      printf("cell %li with faces from %li to %li\n", c, startFaceI, endFaceI-1);
       for (long f=startFaceI; f < endFaceI; f++)
       {
-         long startVertexI = gmv_meshdata.facetoverts[f];
-	 long endVertexI = gmv_meshdata.facetoverts[f+1];
-	 printf("   face %li with vertices from %li to %li\n", f, startVertexI, endVertexI-1);
-	 for (long v=startVertexI; v < endVertexI; v++)
-	 {
-            long vertexI = gmv_meshdata.faceverts[v];
-            printf("vertex %li ", vertexI);
-            printf("(%e %e %e) ", gmv_meshdata.x[vertexI], gmv_meshdata.y[vertexI], gmv_meshdata.z[vertexI]);
-	 }
-         printf("\n");
+	  long faceI = gmv_meshdata.cellfaces[f];
+          fprintf(cells_file, "%li ", faceI);
       }
-      printf("\n");
+      fprintf(cells_file, "\n");
    }
+   fclose(cells_file);
+
+   printf("nfaces %li\n", gmv_meshdata.nfaces);
+   printf("totfaces %li\n", gmv_meshdata.totfaces);
+   printf("nnodes %li\n", gmv_meshdata.nnodes);
+   printf("totverts %li\n", gmv_meshdata.totverts);
+
    gmvread_close();
    return EXIT_SUCCESS;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

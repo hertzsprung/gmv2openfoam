@@ -1,5 +1,5 @@
-gmvread
-points.dat
+*.dat
+
 # Object files
 *.o
 *.ko
@@ -23,6 +23,7 @@ points.dat
 *.dylib
 
 # Executables
+gmvread
 *.exe
 *.out
 *.app
