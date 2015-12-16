@@ -36,8 +36,11 @@ with open("cells.dat") as cells_file:
     for cell_str in cells_file.readlines():
         cells.append([int(c) for c in cell_str.split()])
 
+# rewrite cells so that they refer to the normative faces
 cells = [list(map(uniquify_face_index, cell)) for cell in cells]
 
+# rewrite faces to retain only the normative faces,
+# maintaining a mapping from old to new face indices
 faces = []
 for new_faceI, item in enumerate(unique_face_dict.items()):
     faces.append(item[0])
@@ -56,29 +59,45 @@ for cellI, cell in enumerate(cells):
 # TODO: presumably all faces, internal or boundary have an owner, but only internal faces have a neighbour?
 # TODO: figure out boundary faces
 internal_faces = [faces[faceI] for faceI, cells in enumerate(adjacency) if len(cells) > 1]
-owner = [cells[0] for cells in adjacency if len(cells) > 1]
-neighbour = [cells[1] for cells in adjacency if len(cells) > 1]
+boundary_faces = [faces[faceI] for faceI, cells in enumerate(adjacency) if len(cells) == 1]
+internal_owners = [cells[0] for cells in adjacency if len(cells) > 1]
+boundary_owners = [cells[0] for cells in adjacency if len(cells) == 1]
+neighbours = [cells[1] for cells in adjacency if len(cells) > 1]
 
 def format_list(l):
     return "(" + " ".join([str(x) for x in l]) + ")"
 
-def format_file(name, l, formatter, clazz):
-    with open("constant/polyMesh/" + name, "w") as f:
-        print("""FoamFile
+def format_header(name, clazz):
+    return """FoamFile
 {{
     version     2.0;
     format      ascii;
     class       {clazz};
     location    "constant/polyMesh";
     object      {name};
-}}""".format(name=name, clazz=clazz), file=f)
+}}""".format(name=name, clazz=clazz)
+
+def format_file(name, l, formatter, clazz):
+    with open("constant/polyMesh/" + name, "w") as f:
+        print(format_header(name, clazz), file=f)
         print(len(l), file=f)
         print("(", file=f)
         for x in l:
             print(formatter(x), file=f)
         print(")", file=f)
 
+def format_boundary():
+    with open("constant/polyMesh/boundary", "w") as f:
+        print(format_header("boundary", "polyBoundaryMesh"), file=f)
+        print("1\n(\neverything\n{\ntype wall;", file=f)
+        print("nFaces {faces};".format(faces=len(boundary_faces)), file=f)
+        print("startFace {start};".format(start=len(internal_faces)), file=f)
+        print("}", file=f)
+        print(")", file=f)
+
+
 format_file("points", vertices, format_list, "vectorField")
 format_file("faces", internal_faces, format_list, "faceList")
-format_file("owner", owner, str, "labelList")
-format_file("neighbour", neighbour, str, "labelList")
+format_file("owner", internal_owners, str, "labelList")
+format_file("neighbour", neighbours, str, "labelList")
+#format_boundary()
