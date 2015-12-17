@@ -6147,10 +6147,15 @@ void struct2face()
    gmv_meshdata.facetoverts[nf] = nv;
 }
 
-int main(int args, char **argv)
+int main(int argc, char **argv)
 {
-   gmvread_checkfile("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
-   gmvread_open("/home/jshaw/asam_grid/EXAMPLE/Agnesi2D.out.gmvG");
+   if (argc < 2) {
+      fprintf(stderr, "Usage: gmvread <filename>\n");
+      return EXIT_FAILURE;
+   }
+   char* filename = argv[1];
+   gmvread_checkfile(filename);
+   gmvread_open(filename);
    gmvread_data();
    gmvread_mesh();
 
