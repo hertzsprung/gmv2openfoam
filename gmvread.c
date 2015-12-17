@@ -6149,18 +6149,22 @@ void struct2face()
 
 int main(int argc, char **argv)
 {
-   if (argc < 2) {
-      fprintf(stderr, "Usage: gmvread <filename>\n");
+   if (argc < 3) {
+      fprintf(stderr, "Usage: gmvread <gmv-file> <output-directory>\n");
       return EXIT_FAILURE;
    }
-   char* filename = argv[1];
-   gmvread_checkfile(filename);
-   gmvread_open(filename);
+   char* gmv_file = argv[1];
+   char* output_dir = argv[2];
+
+   gmvread_checkfile(gmv_file);
+   gmvread_open(gmv_file);
    gmvread_data();
    gmvread_mesh();
 
    FILE* points_file;
-   points_file = fopen("points.dat", "w");
+   char* points_filename;
+   asprintf(&points_filename, "%s/%s", output_dir, "points.dat");
+   points_file = fopen(points_filename, "w");
    for (int v=0; v < gmv_meshdata.nnodes; v++)
    {
       fprintf(points_file, "%e %e %e\n", gmv_meshdata.x[v], gmv_meshdata.y[v], gmv_meshdata.z[v]);
@@ -6168,7 +6172,9 @@ int main(int argc, char **argv)
    fclose(points_file);
 
    FILE* faces_file;
-   faces_file = fopen("faces.dat", "w");
+   char* faces_filename;
+   asprintf(&faces_filename, "%s/%s", output_dir, "faces.dat");
+   faces_file = fopen(faces_filename, "w");
    for (int f=0; f < gmv_meshdata.nfaces; f++)
    {
       long startVertexI = gmv_meshdata.facetoverts[f];
@@ -6183,7 +6189,9 @@ int main(int argc, char **argv)
    fclose(faces_file);
 
    FILE* cells_file;
-   cells_file = fopen("cells.dat", "w");
+   char* cells_filename;
+   asprintf(&cells_filename, "%s/%s", output_dir, "cells.dat");
+   cells_file = fopen(cells_filename, "w");
    for (long c=0; c < gmv_meshdata.ncells; c++)
    {
       long startFaceI = gmv_meshdata.celltoface[c];
@@ -6196,11 +6204,6 @@ int main(int argc, char **argv)
       fprintf(cells_file, "\n");
    }
    fclose(cells_file);
-
-   printf("nfaces %li\n", gmv_meshdata.nfaces);
-   printf("totfaces %li\n", gmv_meshdata.totfaces);
-   printf("nnodes %li\n", gmv_meshdata.nnodes);
-   printf("totverts %li\n", gmv_meshdata.totverts);
 
    gmvread_close();
    return EXIT_SUCCESS;
