@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 import numpy as np
 from numpy import pi
 from collections import Counter
@@ -7,13 +8,20 @@ from numpy.linalg import norm
 vertices = [] # a list of (x, y, z) tuples
 faces = set() # a set of faces, each element being a list of vertex indices
 
-with open("points.dat") as points_file:
+if len(sys.argv) < 3:
+    print("Usage: gmv2obj.py <input-directory> <obj-file>", file=sys.stderr)
+    sys.exit(1)
+
+input_dir = sys.argv[1]
+obj_file = sys.argv[2]
+
+with open(input_dir + "/points.dat") as points_file:
     f = points_file.readlines()
     print("Loaded {v} vertices".format(v=len(f)))
     for vertex_str in f:
         vertices.append(tuple([float(v) for v in vertex_str.split()]))
 
-with open("faces.dat") as faces_file:
+with open(input_dir + "/faces.dat") as faces_file:
     faces_file_lines = faces_file.readlines()
     print("Loaded {f} faces".format(f=len(faces_file_lines)))
     for faceI, face_str in enumerate(faces_file_lines):
@@ -79,7 +87,7 @@ def reorient(face):
 
 front_faces = [reorient(f) for f in front_faces]
 
-with open("surface.obj", "w") as fh:
+with open(obj_file, "w") as fh:
     for v in vertices:
         print("v {x} {y} {z}".format(x=v[0], y=v[1], z=v[2]), file=fh)
     for f in front_faces:
