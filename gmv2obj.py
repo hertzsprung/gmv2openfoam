@@ -3,6 +3,8 @@ import sys
 import numpy as np
 from numpy import pi
 from collections import Counter
+from collections import defaultdict
+from collections import OrderedDict
 from numpy.linalg import norm
 
 vertices = [] # a list of (x, y, z) tuples
@@ -27,6 +29,30 @@ with open(input_dir + "/faces.dat") as faces_file:
     for faceI, face_str in enumerate(faces_file_lines):
         faces.add(tuple([int(f) for f in face_str.split()]))
     print("Found {f} unique faces".format(f=len(faces)))
+
+# ensure that faces refer to the "normative" vertices where duplicate vertices exist
+# for simplicity, we don't modify the vertices list itself
+normative_vertices = OrderedDict()
+vertex_dict = defaultdict(list)
+
+for i, v in enumerate(vertices):
+    vertex_dict[v].append(i+1)
+    if v not in normative_vertices:
+        normative_vertices[v] = i+1
+
+print("Found {v} unique vertices".format(v=len(normative_vertices)))
+print("Remapping vertex indices")
+
+vertex_remap = {}
+for vertex_indices in vertex_dict.values():
+    normative_index = vertex_indices[0]
+    for vertex_index in vertex_indices:
+        vertex_remap[vertex_index] = normative_index
+
+def remap_vertices(face):
+    return tuple([vertex_remap[v] for v in face])
+
+faces = [remap_vertices(f) for f in faces]
 
 # find front faces (must have all vertices with y=0)
 front_faces = []
