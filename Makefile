@@ -15,8 +15,9 @@ bindir := $(exec_prefix)/bin
 clean:
 	$(RM) gmvread gmvread.o
 
-install: gmvread | $(DESTDIR)$(bindir)
-	cp $< $(DESTDIR)$(bindir)/
+install: gmvread gmv2obj | $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) gmvread $(DESTDIR)$(bindir)/
+	$(INSTALL_PROGRAM) gmv2obj $(DESTDIR)$(bindir)/
 
 $(DESTDIR)$(bindir):
 	mkdir -p $@
