@@ -4,6 +4,8 @@ MAKEFLAGS += --no-builtin-rules
 .SUFFIXES:
 .PHONY: clean install
 
+CFLAGS := -std=c99
+
 INSTALL := cp
 INSTALL_PROGRAM := $(INSTALL)
 prefix := /usr/local
@@ -20,4 +22,4 @@ $(DESTDIR)$(bindir):
 	mkdir -p $@
 
 gmvread: gmvread.c gmvread.h
-	gcc -D_GNU_SOURCE -I. -o $@ $<
+	gcc -D_GNU_SOURCE -I. $(CFLAGS) -o $@ $<
