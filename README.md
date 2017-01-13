@@ -1,4 +1,6 @@
 # gmv2openfoam
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.242387.svg)](https://doi.org/10.5281/zenodo.242387)
+
 Convert GMV meshes to OpenFOAM meshes.  This allows 2D cut cell meshes produced by [ASAM](https://www.tropos.de/en/research/projects-infrastructures-technology/technology-at-tropos/numerical-modeling/asam/) to be used in [OpenFOAM](http://www.openfoam.org/).
 
 There are four steps to create an OpenFOAM mesh:
